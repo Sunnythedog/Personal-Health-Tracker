@@ -1,48 +1,74 @@
-# health.py started 12/31/17 @ 12:40 pm revision 0.1
+#! Python 3
+# health.py started 12/31/17 @ 12:40 pm revision 0.2
 # Created to track my health
+# Programmed on macbook running macOS High Sierra 10.13.3
 
 import sqlite3
-import time
 import csv
+from PIL import Image
 
+try:
+    import tkinter
+except ImportError:
+    import Tkinter as tkinter
+
+# Open Db
 conn = sqlite3.connect('health.db')
 c = conn.cursor()
 
-# Blood Pressure menu selection for database input
+
+# resize image to fit screen
+def resize_image():
+    x = Image.open('screen0001.gif')
+    new_photo = x.resize((1440,855))
+    new_photo.save('screen0001-1440x855.gif')
+    return
+
+
+def resize_button():
+    x = Image.open('Heart_Rate_Button0001.gif')
+    new_photo = x.resize((50,50))
+    new_photo.save('Heart_Rate_Button.gif')
+    return
+
+
+def heart_rate():
+    print('Heart Rate')
+
+
+def weight():
+    print('weight')
+
+
+def exercise():
+    print('exercise')
+
 
 def blood_pressure():
-
     def blood_pressure_menu():
-        print('1 - Add Data to Database')
-        print('2 - View Inputted Data')
-        print('3 - Return to Main Menu')
-        print("")
-        selection = input('Enter Selection: ')
-        print("")
 
-        if selection == '1':
-            create_table_blood_pressure()
-            blood_pressure_dynamic_data_entry()
-        elif selection == '2':
-            create_table_blood_pressure()
-            read_from_db_blood_pressure()
-        elif selection == '3':
-            main_menu()
-        else:
-            print('Unknown option selected, please choose again')
-            blood_pressure_menu()
+        # Buttons
+        addDataDbButton = tkinter.Button(window, text='Add Data to Db', command=create_table_blood_pressure)
+        addDataDbButton.grid(row=1, column=0, sticky='new')
+        viewDataButton = tkinter.Button(window, text='View Inputted Data', command=read_from_db_blood_pressure)
+        viewDataButton.grid(row=3, column=1, sticky='new')
+        returnMainMenuButton = tkinter.Button(window, text='Return Main Window', command=main_page)
+        returnMainMenuButton.grid(row=4, column=1, sticky='new')
+
+        window.mainloop()
 
     def create_table_blood_pressure():
-        c.execute('CREATE TABLE IF NOT EXISTS blood_pressure(unix REAL, systolic INT, diastolic INT, heart_rate INT)')
+        c.execute('CREATE TABLE IF NOT EXISTS blood_pressure(date TEXT, systolic INT, diastolic INT, heart_rate INT)')
 
-    def blood_pressure_dynamic_data_entry():
-        unix = time.time()
+        date = input('enter date (MM-DD-YYYY): ')
         systolic = input('enter systolic rate: ')
         diastolic = input('enter diastolic rate: ')
         heart_rate = input('enter heart rate: ')
-        c.execute("INSERT INTO blood_pressure (unix, systolic, diastolic, heart_rate) VALUES (?, ?, ?, ?)",
-                  (unix, systolic, diastolic, heart_rate))
+        c.execute("INSERT INTO blood_pressure (date, systolic, diastolic, heart_rate) VALUES (?, ?, ?, ?)",
+                  (date, systolic, diastolic, heart_rate))
         conn.commit()
+
+        blood_pressure_menu()
 
     def read_from_db_blood_pressure():
         c.execute('SELECT * FROM blood_pressure')
@@ -51,9 +77,12 @@ def blood_pressure():
 
     blood_pressure_menu()
 
-    main_menu()
+# TODO create menu: 1 input data, 2 graph data
+
+# TODO creat graph to show data
 
 # Blood Test menu selection for database input (33 Values)
+
 
 def blood_test():
 
@@ -107,7 +136,7 @@ def blood_test():
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)""",
         (date, WBC, RBC, HGB, HCT, MCV, MCH, MCH_C, RDW, PLT, MPV, Glu, BUN, BUNCreat, Calcium, Na, K, Cl, CO2, TP, Alb,
-         AG, Tbili, AlkPhos, AST, ALT, Anion, GFR, Chol, Trig, HDL, LDL, VLDL))
+        AG, Tbili, AlkPhos, AST, ALT, Anion, GFR, Chol, Trig, HDL, LDL, VLDL))
         conn.commit()
 
     def read_from_db_blood_test():
@@ -119,33 +148,49 @@ def blood_test():
     blood_test_dynamic_data_entry()
     read_from_db_blood_test()
 
-    main_menu()
+    main_page()
+
+# TODO create menu: 1 input data, 2 graph data
+
+# TODO creat graph to show data
 
 # Body temperature upload/download to database
 
+
 def body_temperature():
 
-    def create_table_body_temperature():
-        c.execute('CREATE TABLE IF NOT EXISTS body_temperature(unix REAL, temperature REAL, feeling TEXT)')
+    def body_temp_menu():
 
-    def body_temperature_dynamic_data_entry():
-        unix = time.time()
+        addDataDbButton = tkinter.Button(window, text='Add Data to Db', command=create_table_body_temperature)
+        addDataDbButton.grid(row=2, column=1, sticky='new')
+        viewDataButton = tkinter.Button(window, text='View Inputted Data', command=read_from_db_body_temperature)
+        viewDataButton.grid(row=3, column=1, sticky='new')
+        returnMainMenuButton = tkinter.Button(window, text='Main Menu', command=main_page)
+        returnMainMenuButton.grid(row=4, column=1, sticky='new')
+
+        window.mainloop()
+
+    def create_table_body_temperature():
+        c.execute('CREATE TABLE IF NOT EXISTS body_temperature(date TEXT, temperature REAL, feeling TEXT)')
+
+        date = input('Enter Date of measurement (MM-DD-YYYY: ')
         temperature = input('Enter Body Temperature: ')
         feeling = input('Enter how you are feeling today: ')
-        c.execute("INSERT INTO body_temperature(unix, temperature, feeling) VALUES (?, ?, ?)",
-                  (unix, temperature, feeling))
+        c.execute("INSERT INTO body_temperature(date, temperature, feeling) VALUES (?, ?, ?)",
+                  (date, temperature, feeling))
         conn.commit()
+        body_temp_menu()
 
     def read_from_db_body_temperature():
         c.execute('SELECT * FROM body_temperature')
         for row in c.fetchall():
             print(row)
 
-    create_table_body_temperature()
-    body_temperature_dynamic_data_entry()
-    read_from_db_body_temperature()
+    body_temp_menu()
 
-    main_menu()
+# TODO create menu: 1 input data, 2 graph data
+
+# TODO create graph to show data
 
 
 # Nutritional Information and daily food tracker
@@ -278,7 +323,7 @@ def diet():
         elif selection == '2':
             nutritional_data_table()
         elif selection == 'm':
-            main_menu()
+            main_page()
         else:
             print ('Unknown option selected, please choose again')
             diet_menu()
@@ -286,7 +331,12 @@ def diet():
 
     diet_menu()
 
+# TODO add menu: one to add new foods, two to track food diary, 3 to graph calories & nutrients
+
+# TODO graphs to track calories & nutrition
+
 # Upload Apple Health csv data to database
+
 
 def upload_apple_data():
 
@@ -357,51 +407,142 @@ def upload_apple_data():
 
             conn.commit()
 
-# Main Menu
+# TODO add menu: Input data, analyze data
 
-def main_menu():
+# TODO add data analysis with matplotlib graphs
 
-    print('')
-    print('1 - Blood Pressure')
-    print('2 - Blood Test Results')
-    print('3 - Weight, PWV, Bone Weight, Muscle Weight, Body Fat Percentage, Water')
-    print('4 - Body Temperature')
-    print('5 - Diet')
-    print('6 - Exercise')
-    print('7 - O2 Levels')
-    print('8 - Upload Apple Health Data')
-    print('q - To Quit')
-    print('')
+# TODO create and import background photo of Star Trek Next Generation medical bay monitor
 
-    menu_selection = input('Make a selection: ')
-    print('')
+# TODO add personal profile to program
 
-    if menu_selection == '1':
-        blood_pressure()
-    elif menu_selection == '2':
-        blood_test()
-    elif menu_selection == '3':
-        print('three')
-    elif menu_selection == '4':
-        body_temperature()
-    elif menu_selection == '5':
-        diet()
-    elif menu_selection == '6':
-        print ('six')
-    elif menu_selection == '7':
-        print ('seven')
-    elif menu_selection == '8':
-        upload_apple_data()
-    elif menu_selection == 'q':
-        print('quit')
-    else:
-        print ('Unknown option selected, please choose again')
-        main_menu()
-        print('')
+# TODO add medical information, doctors visits, reason, diagnosis
+
+# TODO create table to track item 3 weight, PWV, bone, muscle, body fat
+
+
+# Table to track SpO2 levels
+def spO2Saturation():
+
+    def createSpO2SaturationLevelsTable():
+        c.execute('CREATE TABLE IF NOT EXISTS SpO2SaturationLevels(date TEXT, SpO2Level REAL, pulse REAL, PIMeasurement REAL)')
+
+        date = input('Enter Date of measurement (MM-DD-YYYY): ')
+        SpO2Level = input('Enter SpO2 level (Range 0%-100% enter as a number: ')
+        pulse = input('Input your pulse: ')
+        PIMeasurement = input('Input your PI Measurement (Range 0.2% - 20%): ')
+        c.execute("INSERT INTO SpO2SaturationLevels(date, SpO2Level, pulse, PIMeasurement) VALUES (?, ?, ?, ?)",
+                  (date, SpO2Level, pulse, PIMeasurement))
+        conn.commit()
+        spo2SaturationLevelMenu()
+
+    def readSpO2Data():
+        c.execute('SELECT * FROM SpO2SaturationLevels')
+        for row in c.fetchall():
+            print(row)
+
+    def spo2SaturationLevelMenu():
+
+        addDataDbButton = tkinter.Button(window, text='Add O2 Data to Db', command=createSpO2SaturationLevelsTable)
+        addDataDbButton.grid(row=2, column=1, sticky='new')
+        viewDataButton = tkinter.Button(window, text='View Inputted Data', command=readSpO2Data)
+        viewDataButton.grid(row=3, column=1, sticky='new')
+        returnMainMenuButton = tkinter.Button(window, text='Main Menu', command=main_page)
+        returnMainMenuButton.grid(row=4, column=1, sticky='new')
+
+        window.mainloop()
+
+    spo2SaturationLevelMenu()
+
+# TODO create table to track sleep
+
+# TODO create table to track meditation/mindfulness
+
+
+def main_page():
+    # Background colors
+    myColor='#%02x%02x%02x' % (255, 175, 0)
+    myColor1='#%02x%02x%02x' % (255, 238, 170)
+
+    # Buttons
+    heartRateButton = tkinter.Button(window, highlightbackground=myColor, text='Heart Rate', width=14, command=heart_rate)
+    heartRateButton.place(x=23, y=236)
+    heartRate = tkinter.Label(window, foreground='yellow', background='black', text='BPM')
+    heartRate.place(x=250, y=237)
+    latestRate = tkinter.Label(window, foreground='green', background='black', text='77')
+    latestRate.place(x=400, y=237)
+
+    bloodPressureButton = tkinter.Button(window, highlightbackground=myColor, text='Blood Pressure', width=13, command=blood_pressure)
+    bloodPressureButton.place(x=23, y=305)
+    bloodPressure = tkinter.Label(window, foreground='yellow', background='black', text='Sys/Dia')
+    bloodPressure.place(x=250, y=307)
+    latestPressure = tkinter.Label(window, foreground='green', background='black', text='120/80')
+    latestPressure.place(x=400, y=307)
+
+    bodyTempButton = tkinter.Button(window, highlightbackground=myColor, text='Body Temperature', width=14, command=body_temperature)
+    bodyTempButton.place(x=23, y=372)
+    bodyTemperature = tkinter.Label(window, foreground='yellow', background='black', text='Temp(F)')
+    bodyTemperature.place(x=250, y=373)
+    latestTemp = tkinter.Label(window, foreground='green', background='black', text='98.6')
+    latestTemp.place(x=400, y=373)
+
+    spo2LevelsButton = tkinter.Button(window, highlightbackground=myColor, text='SpO2 Saturation', width=14, command=spO2Saturation)
+    spo2LevelsButton.place(x=23, y=436)
+    spo2Level = tkinter.Label(window, foreground='yellow', background='black', text='SpO2')
+    spo2Level.place(x=250, y=437)
+    latestSpo2 = tkinter.Label(window, foreground='green', background='black', text='96')
+    latestSpo2.place(x=400, y=437)
+
+    weightButton = tkinter.Button(window, highlightbackground=myColor, text='Body weight', width=14, command=blood_pressure)
+    weightButton.place(x=23, y=500)
+    currentWeight = tkinter.Label(window, foreground='yellow', background='black', text='Weight(lbs)')
+    currentWeight.place(x=250, y=501)
+    latestWeight = tkinter.Label(window, foreground='green', background='black', text='176')
+    latestWeight.place(x=400, y=501)
+
+    bloodTestButton = tkinter.Button(window, highlightbackground=myColor1, text='Blood Test Results', width=14, command=blood_test)
+    bloodTestButton.place(x=1155, y=241)
+    dietButton = tkinter.Button(window, highlightbackground=myColor1, text='Diet', width=14, command=diet)
+    dietButton.place(x=1155, y=307)
+    exerciseButton = tkinter.Button(window, highlightbackground=myColor1, text='Exercise', width=14, command=exercise)
+    exerciseButton.place(x=1155, y=372)
+    exitButton = tkinter.Button(window, highlightbackground=myColor1, text='Exit', width=14, command=quit)
+    exitButton.place(x=1155, y=634)
+    window.mainloop()
 
 # Main program
 
-main_menu()
+
+window = tkinter.Tk()
+
+# For screen size (for my 13" Macbook Air screen nee to change for rasp pi)
+w = 1440
+h = 855
+
+window.attributes('-alpha', 0.0)
+window.iconify()
+
+window = tkinter.Toplevel(window)
+window.minsize(100, 100)
+window.overrideredirect(1)  # to remove boarder around the window
+
+# center window
+ws = window.winfo_screenwidth()
+hs = window.winfo_screenheight()
+
+x = (ws/2) - (w/2)
+y = (hs/2) - (h/2)
+
+window.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
+# resize image to fit screen
+resize_image()
+
+# Add background image
+photo = tkinter.PhotoImage(file='screen0001-1440x855.gif')
+window = tkinter.Label(window, image=photo, border=0)
+window.pack(side="bottom", fill="both", expand="yes")
+
+main_page()
 
 c.close()
 conn.close()
